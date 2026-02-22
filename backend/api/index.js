@@ -225,7 +225,34 @@ app.get("/api", (req, res) => {
           description: "Get Neon Auth configuration info",
           auth: false,
           responses: {
-            200: { neonAuthEnabled: "boolean", neonAuthUrl: "string", providers: ["email"] },
+            200: { neonAuthEnabled: "boolean", neonAuthUrl: "string", providers: ["email", "google", "github"], oauthProviders: { google: { enabled: true }, github: { enabled: true } } },
+          },
+        },
+        "GET /api/auth/neon/oauth/google": {
+          description: "Initiate Google OAuth via Neon Auth (shared keys — no custom credentials needed)",
+          auth: false,
+          queryParams: { session: "string (optional — session ID for desktop polling)" },
+          response: "302 redirect to Google OAuth via Neon Auth",
+        },
+        "GET /api/auth/neon/oauth/github": {
+          description: "Initiate GitHub OAuth via Neon Auth",
+          auth: false,
+          queryParams: { session: "string (optional — session ID for desktop polling)" },
+          response: "302 redirect to GitHub OAuth via Neon Auth",
+        },
+        "GET /api/auth/neon/oauth-callback": {
+          description: "Callback from Neon Auth after OAuth (serves bridge page to complete the flow)",
+          auth: false,
+          queryParams: { code: "string (pending session code)" },
+          response: "HTML bridge page that finalizes user creation and JWT generation",
+        },
+        "GET /api/auth/neon/oauth-result/:code": {
+          description: "Poll for Neon OAuth result (used by desktop app after OAuth flow)",
+          auth: false,
+          params: { code: "string (session code from /neon/oauth/google or /neon/oauth/github)" },
+          responses: {
+            200: { status: "ok", token: "JWT string", user: { id: "number", username: "string", email: "string" } },
+            202: { status: "pending" },
           },
         },
       },
