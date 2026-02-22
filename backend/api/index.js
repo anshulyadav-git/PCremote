@@ -12,6 +12,9 @@ const { initDb } = require("../src/db/database");
 
 const app = express();
 
+// Pretty-print all JSON responses
+app.set("json spaces", 2);
+
 // --- DB init on cold start ---
 let dbInitialized = false;
 app.use(async (req, res, next) => {
