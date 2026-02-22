@@ -11,12 +11,14 @@ const { generateToken } = require("./middleware");
 
 const router = express.Router();
 
-const NEON_AUTH_URL =
+const NEON_AUTH_URL = (
   process.env.NEON_AUTH_URL ||
-  "https://ep-odd-shape-ailpstvi.neonauth.c-4.us-east-1.aws.neon.tech/neondb/auth";
+  "https://ep-odd-shape-ailpstvi.neonauth.c-4.us-east-1.aws.neon.tech/neondb/auth"
+).trim();
 
-const NEON_AUTH_ORIGIN =
-  process.env.NEON_AUTH_ORIGIN || "https://pcremote-backend-ashen.vercel.app";
+const NEON_AUTH_ORIGIN = (
+  process.env.NEON_AUTH_ORIGIN || "https://pcremote-backend-ashen.vercel.app"
+).trim();
 
 // ─── Helper: HTTPS JSON request ──────────────────────────────────────────────
 
