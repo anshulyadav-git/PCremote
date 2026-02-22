@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("../src/auth/auth.routes");
 const oauthRoutes = require("../src/auth/oauth.routes");
+const neonAuthRoutes = require("../src/auth/neon-auth.routes");
 const deviceRoutes = require("../src/routes/devices");
 const { initDb } = require("../src/db/database");
 
@@ -189,12 +190,55 @@ app.get("/api", (req, res) => {
           },
         },
       },
+      neonAuth: {
+        "POST /api/auth/neon/signup": {
+          description: "Register via Neon Auth (managed Better Auth)",
+          auth: false,
+          rateLimit: "20 requests per 15 minutes",
+          body: {
+            name: "string (optional)",
+            email: "string (required)",
+            password: "string (required, min 8 chars)",
+          },
+          responses: {
+            201: { message: "User registered via Neon Auth", user: { id: "number", username: "string", email: "string" }, neonUser: { id: "uuid", name: "string", email: "string" }, token: "JWT string", neonToken: "Neon session token" },
+            400: { error: "email and password are required" },
+            500: { error: "Internal server error" },
+          },
+        },
+        "POST /api/auth/neon/signin": {
+          description: "Sign in via Neon Auth (managed Better Auth)",
+          auth: false,
+          rateLimit: "20 requests per 15 minutes",
+          body: {
+            email: "string (required)",
+            password: "string (required)",
+          },
+          responses: {
+            200: { message: "Login successful via Neon Auth", user: { id: "number", username: "string", email: "string" }, neonUser: { id: "uuid", name: "string", email: "string" }, token: "JWT string", neonToken: "Neon session token" },
+            400: { error: "email and password are required" },
+            401: { error: "Invalid credentials (Neon Auth)" },
+            500: { error: "Internal server error" },
+          },
+        },
+        "GET /api/auth/neon/info": {
+          description: "Get Neon Auth configuration info",
+          auth: false,
+          responses: {
+            200: { neonAuthEnabled: "boolean", neonAuthUrl: "string", providers: ["email"] },
+          },
+        },
+      },
     },
     authentication: {
       type: "Bearer Token (JWT)",
       header: "Authorization: Bearer <token>",
       expiresIn: "7 days",
-      obtain: "POST /api/auth/register, POST /api/auth/login, or OAuth flow",
+      obtain: "POST /api/auth/register, POST /api/auth/login, POST /api/auth/neon/signin, or OAuth flow",
+    },
+    neonAuth: {
+      description: "Managed authentication powered by Neon Auth (Better Auth). User data stored in neon_auth schema.",
+      authUrl: process.env.NEON_AUTH_URL || "https://ep-odd-shape-ailpstvi.neonauth.c-4.us-east-1.aws.neon.tech/neondb/auth",
     },
     rateLimit: {
       auth: "20 requests per 15 minutes on /api/auth/*",
@@ -216,6 +260,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/auth", oauthRoutes);
+app.use("/api/auth", neonAuthRoutes);
 app.use("/api/devices", deviceRoutes);
 
 // --- 404 catch-all ---
