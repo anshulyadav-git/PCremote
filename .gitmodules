@@ -1,0 +1,12 @@
+[submodule "remote-desktop"]
+	path = remote-desktop
+	url = https://github.com/anshulyadav32/remote-desktop.git
+[submodule "remote-android"]
+	path = remote-android
+	url = https://github.com/KDE/kdeconnect-android.git
+[submodule "remote-ios"]
+	path = remote-ios
+	url = https://invent.kde.org/network/kdeconnect-ios.git
+[submodule "remote-linux"]
+	path = remote-linux
+	url = https://github.com/KDE/kde-linux.git

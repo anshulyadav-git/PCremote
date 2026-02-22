@@ -1,0 +1,71 @@
+// Prisma schema for Remote backend — Neon PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  email         String   @unique
+  password      String   @default("")
+  oauthProvider String?  @map("oauth_provider")
+  oauthId       String?  @map("oauth_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  devices  Device[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Device {
+  id        String   @id
+  userId    Int      @map("user_id")
+  name      String
+  type      String   @default("unknown")
+  platform  String?
+  lastSeen  DateTime @default(now()) @map("last_seen")
+  isOnline  Boolean  @default(false) @map("is_online")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
+  pairsA   DevicePair[] @relation("pairDeviceA")
+  pairsB   DevicePair[] @relation("pairDeviceB")
+
+  @@map("devices")
+}
+
+model DevicePair {
+  id        Int      @id @default(autoincrement())
+  deviceA   String   @map("device_a")
+  deviceB   String   @map("device_b")
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  deviceARef Device @relation("pairDeviceA", fields: [deviceA], references: [id], onDelete: Cascade)
+  deviceBRef Device @relation("pairDeviceB", fields: [deviceB], references: [id], onDelete: Cascade)
+
+  @@unique([deviceA, deviceB])
+  @@map("device_pairs")
+}
+
+model Session {
+  id        String   @id
+  userId    Int      @map("user_id")
+  deviceId  String   @map("device_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
