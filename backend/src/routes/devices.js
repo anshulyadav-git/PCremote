@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
     is_online: clients.has(d.id) ? true : false,
   }));
 
-  res.json({ devices: enriched });
+  res.json({ devices: enriched, timestamp: new Date().toISOString() });
 });
 
 /**
@@ -37,7 +37,7 @@ router.delete("/:id", async (req, res) => {
   });
 
   if (!device) {
-    return res.status(404).json({ error: "Device not found" });
+    return res.status(404).json({ error: "Device not found", timestamp: new Date().toISOString() });
   }
 
   await prisma.devicePair.deleteMany({
@@ -45,7 +45,7 @@ router.delete("/:id", async (req, res) => {
   });
   await prisma.device.delete({ where: { id: req.params.id } });
 
-  res.json({ message: "Device removed" });
+  res.json({ message: "Device removed", timestamp: new Date().toISOString() });
 });
 
 /**
@@ -58,7 +58,7 @@ router.get("/:id/pairs", async (req, res) => {
   });
 
   if (!device) {
-    return res.status(404).json({ error: "Device not found" });
+    return res.status(404).json({ error: "Device not found", timestamp: new Date().toISOString() });
   }
 
   const pairs = await prisma.devicePair.findMany({
@@ -80,7 +80,7 @@ router.get("/:id/pairs", async (req, res) => {
     });
   }
 
-  res.json({ pairs: enriched });
+  res.json({ pairs: enriched, timestamp: new Date().toISOString() });
 });
 
 /**
@@ -98,10 +98,10 @@ router.post("/:id/unpair/:targetId", async (req, res) => {
   });
 
   if (deleted.count === 0) {
-    return res.status(404).json({ error: "Pair not found" });
+    return res.status(404).json({ error: "Pair not found", timestamp: new Date().toISOString() });
   }
 
-  res.json({ message: "Devices unpaired" });
+  res.json({ message: "Devices unpaired", timestamp: new Date().toISOString() });
 });
 
 module.exports = router;

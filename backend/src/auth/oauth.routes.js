@@ -278,11 +278,11 @@ router.get("/github/callback", async (req, res) => {
 router.get("/oauth-result/:sessionId", (req, res) => {
   const entry = pendingOAuth.get(req.params.sessionId);
   if (!entry) {
-    return res.status(202).json({ status: "pending" });
+    return res.status(202).json({ status: "pending", timestamp: new Date().toISOString() });
   }
   // One-time use — delete after retrieval
   pendingOAuth.delete(req.params.sessionId);
-  res.json({ status: "ok", token: entry.token, user: entry.user });
+  res.json({ status: "ok", token: entry.token, user: entry.user, timestamp: new Date().toISOString() });
 });
 
 module.exports = router;
